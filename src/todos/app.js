@@ -1,11 +1,15 @@
 
-import todoStore from '../store/todo.store';
+import todoStore, { Filters } from '../store/todo.store';
 import html from './app.html?raw';
-import { renderTodos } from './use-case';
+import { renderTodos, renderPending } from './use-case';
+
 
 const ElementIDs ={
+    ClearCompleted: '.clear-completed',
     TodoList:'.todo-list',
     NewTodoImput: '#new-todo-input',
+    TodoFilters:'.filtro',
+    PendingCountLabel:'#pending-count',
 
 }
 /**
@@ -21,8 +25,15 @@ export const App = (elementId)=>{
     const displayTodos =( ) => {
         const todos = todoStore.getTodos(todoStore.getCurrentFilter());
         renderTodos(ElementIDs.TodoList,todos);
+        updatePendingCount()
     }
+    
+    const updatePendingCount =()=>{
+        renderPending(ElementIDs.PendingCountLabel);
 
+
+
+    }
         //cuando la funcion app ()se llama
         (()=>{
 
@@ -42,6 +53,9 @@ export const App = (elementId)=>{
         //referencia HTml
         const newDescriptionInput = document.querySelector(ElementIDs.NewTodoImput);
         const todoListUL = document.querySelector(ElementIDs.TodoList);
+        const clearCompletedButton = document.querySelector(ElementIDs.ClearCompleted);
+        const filtersLIs =document.querySelectorAll(ElementIDs.TodoFilters);
+
 
 
 
@@ -60,13 +74,24 @@ export const App = (elementId)=>{
 
 
             todoListUL.addEventListener('click',(event)=>{
-                const element =event.target.closest('[data-id]');
+                const element = event.target.closest('[data-id]');
                 todoStore.toggleTodo(element.getAttribute('data-id'));
+
+
                 displayTodos();
             })
                 
                 
-                
+        
+            clearCompletedButton.addEventListener('click',(event)=>{
+                //const element = event.target.closest('[data-id]');
+                todoStore.deleteCompleted();
+                //console.log("first");
+                displayTodos();
+
+             
+        });
+
             
             todoListUL.addEventListener('click',(event)=>{
                 
@@ -80,8 +105,41 @@ export const App = (elementId)=>{
 
 
 
+
+
+
+                      
+          
+
+
+
+                
+
+
                 
             })
+      
+            filtersLIs.forEach(element=>{
 
+                element.addEventListener('click',(element)=>{
+                    filtersLIs.forEach(el => el.classList.remove('selected'));
+        
+                    element.target.classList.add('selected');
+                    switch(element.target.text){
+                        case'Todos':
+                        todoStore.setFilter(Filters.All)
+                        break;
+                        case'Pendientes':
+                        todoStore.setFilter(Filters.Pending)
+                        break;
+                        case'Completados':
+                        todoStore.setFilter(Filters.Completed)
+                        break;
+
+                    }
+                    displayTodos();
+                })
+            })
+          
 
 }
